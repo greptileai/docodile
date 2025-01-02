@@ -1,19 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  EditorBubble,
   EditorContent,
-  EditorRoot
+  EditorRoot,
+  type JSONContent,
 } from "novel";
+import { defaultEditorContent } from '@/lib/content';
+import { defaultExtensions } from '@/lib/extensions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
 
 export default function Home() {
   const [repoUrl, setRepoUrl] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const [initialContent, setInitialContent] = useState<null | JSONContent>(null);
+
+  const extensions = [...defaultExtensions];
+
+  useEffect(() => {
+    const content = window.localStorage.getItem("novel-content");
+    if (content) setInitialContent(JSON.parse(content));
+    else setInitialContent(defaultEditorContent);
+  }, []);
+
+  if (!initialContent) return null;
 
   return (
     <div className="flex flex-col h-screen">
@@ -27,11 +47,10 @@ export default function Home() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-64">
+              <SheetHeader>
+                  <SheetTitle>Repository History</SheetTitle>
+              </SheetHeader>
               {/* Sidebar content */}
-              <div className="flex flex-col gap-4 mt-8">
-                <h2 className="text-lg font-semibold">Repository History</h2>
-                {/* Add repository history here */}
-              </div>
             </SheetContent>
           </Sheet>
           <div className="flex items-center gap-2 flex-1 max-w-xl">
@@ -50,10 +69,10 @@ export default function Home() {
       <main className="flex-1 p-4">
         <EditorRoot>
           <EditorContent 
-            initialContent={[]}
+            initialContent={initialContent}
+            extensions={extensions}
             className="min-h-[500px] border rounded-lg"
           />
-          <EditorBubble />
         </EditorRoot>
       </main>
     </div>
